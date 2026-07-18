@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../core/audio/audio_service.dart';
 import '../../../../core/haptics/haptics.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
@@ -35,6 +36,7 @@ class _NotificationBannerHostState
     _shownId = banner.id;
     _autoDismiss?.cancel();
     Haptics.light();
+    AudioService.instance.play(Sfx.notification);
     _autoDismiss = Timer(const Duration(seconds: 5), () {
       ref.read(shellControllerProvider.notifier).dismissNotification(banner.id);
     });

@@ -3,6 +3,7 @@ import 'dart:math';
 
 import 'package:flutter/foundation.dart';
 
+import '../../../core/audio/audio_service.dart';
 import '../domain/chat_models.dart';
 
 class ChatState {
@@ -69,6 +70,7 @@ class ChatController extends ChangeNotifier {
   Timer? _typeTimer;
   String _pendingText = '';
   int _typedChars = 0;
+  ReplyOption? _pendingOption;
 
   ChatState _state;
   ChatState get state => _state;
@@ -83,6 +85,7 @@ class ChatController extends ChangeNotifier {
   void dispose() {
     _disposed = true;
     _typeTimer?.cancel();
+    AudioService.instance.stopTyping();
     super.dispose();
   }
 
@@ -146,6 +149,7 @@ class ChatController extends ChangeNotifier {
     await Future.delayed(Duration(milliseconds: 700 + _random.nextInt(1100)));
     if (_disposed) return;
 
+    AudioService.instance.play(Sfx.messageReceive);
     _set(_state.copyWith(
       npcTypingName: null,
       messages: [
@@ -167,7 +171,15 @@ class ChatController extends ChangeNotifier {
 
   void choose(ReplyOption option) {
     if (_state.playerTyping) return;
-    onChoiceSelected?.call(option);
+    AudioService.instance.play(Sfx.choiceSelect);
+
+    if (option.isAction) {
+      _appendActionNote(option.text);
+      onChoiceSelected?.call(option);
+      return;
+    }
+
+    _pendingOption = option;
     _pendingText = option.text;
     _typedChars = 0;
     _set(_state.copyWith(
@@ -176,7 +188,30 @@ class ChatController extends ChangeNotifier {
       playerTyping: true,
       composerText: '',
     ));
+    AudioService.instance.startTyping();
     _scheduleNextChar();
+  }
+
+  void _appendActionNote(String text) {
+    var t = text.trim();
+    if (t.startsWith('(') && t.endsWith(')')) {
+      t = t.substring(1, t.length - 1);
+    }
+    _set(_state.copyWith(
+      options: const [],
+      awaitingChoice: false,
+      messages: [
+        ..._state.messages,
+        ChatMessage(
+          id: 'm${_state.messages.length}',
+          text: '✓ $t',
+          senderId: 'action',
+          senderName: '✓ $t',
+          fromPlayer: false,
+          system: true,
+        ),
+      ],
+    ));
   }
 
   void _scheduleNextChar() {
@@ -202,8 +237,10 @@ class ChatController extends ChangeNotifier {
   }
 
   Future<void> _finishTyping() async {
+    AudioService.instance.stopTyping();
     await Future.delayed(const Duration(milliseconds: 320));
     if (_disposed) return;
+    AudioService.instance.play(Sfx.messageSend);
     _set(_state.copyWith(
       playerTyping: false,
       composerText: '',
@@ -219,6 +256,9 @@ class ChatController extends ChangeNotifier {
       ],
     ));
     _pendingText = '';
+    final option = _pendingOption;
+    _pendingOption = null;
+    if (option != null) onChoiceSelected?.call(option);
     await Future.delayed(const Duration(milliseconds: 300));
     if (_disposed) return;
     _advance();

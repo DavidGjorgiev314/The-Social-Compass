@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/haptics/haptics.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_spacing.dart';
+import '../../../core/widgets/asset_photo.dart';
 import '../../../models/profile_choices.dart';
 import '../../game/application/game_controller.dart';
 import '../../phone_shell/presentation/widgets/status_bar.dart';
@@ -280,10 +281,18 @@ class _OnboardingFlowState extends ConsumerState<OnboardingFlow> {
                       width: 2.5,
                     ),
                   ),
-                  child: CircleAvatar(
-                    radius: 24,
-                    backgroundColor: _avatarPalette[i],
-                    child: const Icon(Icons.person_rounded, color: Colors.white),
+                  child: ClipOval(
+                    child: resilientAsset(
+                      'assets/images/avatars/avatar_$i.png',
+                      width: 48,
+                      height: 48,
+                      fallback: CircleAvatar(
+                        radius: 24,
+                        backgroundColor: _avatarPalette[i],
+                        child: const Icon(Icons.person_rounded,
+                            color: Colors.white),
+                      ),
+                    ),
                   ),
                 ),
               );

@@ -14,7 +14,22 @@ class PixelgramApp extends StatefulWidget {
 }
 
 class _PixelgramAppState extends State<PixelgramApp> {
+  final PageController _page = PageController();
   int _tab = 0;
+
+  @override
+  void dispose() {
+    _page.dispose();
+    super.dispose();
+  }
+
+  void _goTo(int index) {
+    _page.animateToPage(
+      index,
+      duration: const Duration(milliseconds: 280),
+      curve: Curves.easeOutCubic,
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -23,7 +38,13 @@ class _PixelgramAppState extends State<PixelgramApp> {
         children: [
           _header(),
           const Divider(height: 1, color: AppColors.hairline),
-          Expanded(child: _tab == 0 ? const FeedView() : const InboxView()),
+          Expanded(
+            child: PageView(
+              controller: _page,
+              onPageChanged: (i) => setState(() => _tab = i),
+              children: const [FeedView(), InboxView()],
+            ),
+          ),
           _bottomNav(),
         ],
       ),
@@ -55,7 +76,10 @@ class _PixelgramAppState extends State<PixelgramApp> {
             ),
           ),
           const Spacer(),
-          const Icon(Icons.favorite_border_rounded, color: AppColors.textPrimary),
+          Icon(
+            _tab == 0 ? Icons.favorite_border_rounded : Icons.edit_square,
+            color: AppColors.textPrimary,
+          ),
         ],
       ),
     );
@@ -78,7 +102,7 @@ class _PixelgramAppState extends State<PixelgramApp> {
             for (var i = 0; i < items.length; i++)
               Expanded(
                 child: IconButton(
-                  onPressed: () => setState(() => _tab = i),
+                  onPressed: () => _goTo(i),
                   icon: Icon(
                     _tab == i ? items[i].$1 : items[i].$2,
                     color: _tab == i

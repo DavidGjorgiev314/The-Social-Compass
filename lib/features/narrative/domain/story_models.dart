@@ -57,6 +57,7 @@ class StoryChoice {
     this.delta = const StatDelta(),
     this.setFlags = const {},
     this.visibleIf,
+    this.isAction = false,
   });
 
   final String id;
@@ -65,6 +66,7 @@ class StoryChoice {
   final StatDelta delta;
   final Map<String, bool> setFlags;
   final StoryCondition? visibleIf;
+  final bool isAction;
 }
 
 class StoryLine {

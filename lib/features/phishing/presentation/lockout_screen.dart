@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 
+import '../../../core/audio/audio_service.dart';
 import '../../../core/haptics/haptics.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_spacing.dart';
@@ -37,10 +38,12 @@ class _LockoutScreenState extends State<LockoutScreen> {
   void initState() {
     super.initState();
     Haptics.warning();
+    AudioService.instance.play(Sfx.lock);
     _timer = Timer.periodic(const Duration(seconds: 1), (t) {
       if (_remaining <= 1) {
         t.cancel();
         Haptics.medium();
+        AudioService.instance.play(Sfx.unlock);
         if (mounted) Navigator.of(context).pop();
       } else {
         setState(() => _remaining--);

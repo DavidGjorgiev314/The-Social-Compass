@@ -1,3 +1,5 @@
+import 'package:flutter/material.dart';
+
 import '../../chat/domain/chat_models.dart';
 import '../domain/story_models.dart';
 
@@ -9,12 +11,37 @@ const Map<String, String> kChannelNames = {
   'nadia': 'Nadia Rahman',
   'jordan': 'Jordan Reyes',
   'security': 'Pixelgram Security',
-  'impostor': 'maya_chenn',
+  'impostor': 'Mayaa',
   'burnbook': '🔥 side chat',
 };
 
 String channelName(String? conversationId) =>
     kChannelNames[conversationId] ?? 'Pixelgram';
+
+({String? asset, Color color, String initial}) channelAvatar(String? id) {
+  switch (id) {
+    case 'maya':
+      return (asset: 'assets/images/avatars/maya.jpg', color: const Color(0xFFFF6FA5), initial: 'M');
+    case 'devon':
+      return (asset: 'assets/images/avatars/devon.jpg', color: const Color(0xFF4C8DFF), initial: 'D');
+    case 'nadia':
+      return (asset: 'assets/images/avatars/nadia.jpg', color: const Color(0xFF43E0B8), initial: 'N');
+    case 'jordan':
+      return (asset: 'assets/images/avatars/jordan.jpg', color: const Color(0xFFB06CFF), initial: 'J');
+    case 'econ_group':
+      return (asset: null, color: const Color(0xFF6B7385), initial: '#');
+    case 'campus_rewards':
+      return (asset: 'assets/images/avatars/campus_rewards.jpg', color: const Color(0xFFFFC15E), initial: r'$');
+    case 'security':
+      return (asset: 'assets/images/avatars/pixelgram_security.jpg', color: const Color(0xFFFF5C6C), initial: '!');
+    case 'impostor':
+      return (asset: 'assets/images/avatars/maya.jpg', color: const Color(0xFFFF6FA5), initial: 'M');
+    case 'burnbook':
+      return (asset: null, color: const Color(0xFFFF5C6C), initial: '🔥');
+    default:
+      return (asset: null, color: const Color(0xFF4C8DFF), initial: '?');
+  }
+}
 
 List<ChatBeat> beatsForNode(
   StoryNode node,
@@ -32,7 +59,14 @@ List<ChatBeat> beatsForNode(
     if (visibleChoices.isNotEmpty)
       PlayerChoice(
         options: [
-          for (final c in visibleChoices) ReplyOption(id: c.id, text: c.text),
+          for (final c in visibleChoices)
+            ReplyOption(
+              id: c.id,
+              text: c.text,
+              isAction: c.isAction ||
+                  node.kind == NodeKind.phishing ||
+                  c.text.trim().startsWith('('),
+            ),
         ],
       ),
   ];

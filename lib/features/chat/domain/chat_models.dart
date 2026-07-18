@@ -29,10 +29,11 @@ class ChatMessage {
 }
 
 class ReplyOption {
-  const ReplyOption({required this.id, required this.text});
+  const ReplyOption({required this.id, required this.text, this.isAction = false});
 
   final String id;
   final String text;
+  final bool isAction;
 }
 
 sealed class ChatBeat {

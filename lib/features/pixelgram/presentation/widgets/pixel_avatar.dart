@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../../core/widgets/asset_photo.dart';
 import '../../domain/pixelgram_models.dart';
 
 class PixelAvatar extends StatelessWidget {
@@ -16,13 +17,11 @@ class PixelAvatar extends StatelessWidget {
     Widget inner = _initial(diameter);
     if (avatar.asset != null) {
       inner = ClipOval(
-        child: Image.asset(
+        child: resilientAsset(
           avatar.asset!,
           width: diameter,
           height: diameter,
-          fit: BoxFit.cover,
-          cacheWidth: 256,
-          errorBuilder: (_, __, ___) => _initial(diameter),
+          fallback: _initial(diameter),
         ),
       );
     }

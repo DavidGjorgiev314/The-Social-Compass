@@ -1,5 +1,6 @@
 import 'game_stats.dart';
 import 'profile_choices.dart';
+import 'stored_message.dart';
 
 class GameState {
   const GameState({
@@ -12,6 +13,8 @@ class GameState {
     required this.currentEnding,
     required this.createdAt,
     required this.updatedAt,
+    this.threads = const {},
+    this.unread = const {},
     this.schemaVersion = currentSchemaVersion,
   });
 
@@ -26,9 +29,16 @@ class GameState {
   final String? currentEnding;
   final DateTime createdAt;
   final DateTime updatedAt;
+  final Map<String, List<StoredMessage>> threads;
+  final Map<String, bool> unread;
   final int schemaVersion;
 
   bool flag(String key) => flags[key] ?? false;
+
+  List<StoredMessage> thread(String conversationId) =>
+      threads[conversationId] ?? const [];
+
+  bool isUnread(String conversationId) => unread[conversationId] ?? false;
 
   factory GameState.initial({DateTime? now}) {
     final timestamp = now ?? DateTime.now();
@@ -55,6 +65,8 @@ class GameState {
     Object? currentEnding = _sentinel,
     DateTime? createdAt,
     DateTime? updatedAt,
+    Map<String, List<StoredMessage>>? threads,
+    Map<String, bool>? unread,
     int? schemaVersion,
   }) {
     return GameState(
@@ -69,6 +81,8 @@ class GameState {
           : currentEnding as String?,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
+      threads: threads ?? this.threads,
+      unread: unread ?? this.unread,
       schemaVersion: schemaVersion ?? this.schemaVersion,
     );
   }
@@ -88,6 +102,11 @@ class GameState {
           'unlocked': endingsUnlocked,
           'currentRun': currentEnding,
         },
+        'threads': {
+          for (final entry in threads.entries)
+            entry.key: [for (final m in entry.value) m.toMap()],
+        },
+        'unread': unread,
         'meta': {
           'createdAt': createdAt.toIso8601String(),
           'updatedAt': updatedAt.toIso8601String(),
@@ -100,6 +119,8 @@ class GameState {
     final endings = (map['endings'] as Map?)?.cast<String, dynamic>() ?? {};
     final meta = (map['meta'] as Map?)?.cast<String, dynamic>() ?? {};
     final rawFlags = (map['flags'] as Map?)?.cast<String, dynamic>() ?? {};
+    final rawThreads = (map['threads'] as Map?)?.cast<String, dynamic>() ?? {};
+    final rawUnread = (map['unread'] as Map?)?.cast<String, dynamic>() ?? {};
 
     return GameState(
       profile: ProfileChoices.fromMap(
@@ -112,6 +133,14 @@ class GameState {
       endingsUnlocked:
           (endings['unlocked'] as List?)?.cast<String>() ?? const [],
       currentEnding: endings['currentRun'] as String?,
+      threads: {
+        for (final entry in rawThreads.entries)
+          entry.key: [
+            for (final m in (entry.value as List? ?? const []))
+              StoredMessage.fromMap((m as Map).cast<String, dynamic>()),
+          ],
+      },
+      unread: rawUnread.map((k, v) => MapEntry(k, v as bool? ?? false)),
       createdAt:
           DateTime.tryParse(meta['createdAt'] as String? ?? '') ??
               DateTime.now(),

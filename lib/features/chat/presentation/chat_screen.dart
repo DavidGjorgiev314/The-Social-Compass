@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_spacing.dart';
+import '../../../core/widgets/round_photo.dart';
 import '../../phone_shell/presentation/widgets/status_bar.dart';
 import '../application/chat_controller.dart';
 import '../domain/chat_models.dart';
@@ -18,12 +19,14 @@ class ChatScreen extends StatefulWidget {
     required this.script,
     this.seed = const [],
     this.accent = AppColors.accent,
+    this.avatarAsset,
   });
 
   final String title;
   final List<ChatBeat> script;
   final List<ChatMessage> seed;
   final Color accent;
+  final String? avatarAsset;
 
   @override
   State<ChatScreen> createState() => _ChatScreenState();
@@ -143,17 +146,13 @@ class _ChatScreenState extends State<ChatScreen> {
             icon: const Icon(Icons.arrow_back_ios_new_rounded, size: 18),
             color: AppColors.textPrimary,
           ),
-          CircleAvatar(
+          RoundPhoto(
+            asset: widget.avatarAsset,
+            color: widget.accent,
+            initial: widget.title.isNotEmpty
+                ? widget.title[0].toUpperCase()
+                : '?',
             radius: 16,
-            backgroundColor: widget.accent,
-            child: Text(
-              widget.title.isNotEmpty ? widget.title[0].toUpperCase() : '?',
-              style: const TextStyle(
-                color: Colors.white,
-                fontWeight: FontWeight.w700,
-                fontSize: 14,
-              ),
-            ),
           ),
           const SizedBox(width: AppSpacing.md),
           Text(

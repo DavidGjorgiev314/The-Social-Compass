@@ -24,11 +24,6 @@ class _PhoneShellState extends ConsumerState<PhoneShell>
     vsync: this,
     duration: AppMotion.appLaunch,
   );
-  late final AnimationController _lockController = AnimationController(
-    vsync: this,
-    duration: AppMotion.medium,
-    value: 1.0,
-  );
 
   PhoneApp? _currentApp;
   Alignment _origin = Alignment.center;
@@ -46,7 +41,6 @@ class _PhoneShellState extends ConsumerState<PhoneShell>
   @override
   void dispose() {
     _appController.dispose();
-    _lockController.dispose();
     super.dispose();
   }
 
@@ -66,14 +60,6 @@ class _PhoneShellState extends ConsumerState<PhoneShell>
     _appController.forward();
   }
 
-  void _syncLock(bool isLocked) {
-    if (isLocked) {
-      _lockController.forward();
-    } else {
-      _lockController.reverse();
-    }
-  }
-
   void _handleBannerTap(OsNotification banner) {
     final controller = ref.read(shellControllerProvider.notifier);
     controller.unlock();
@@ -84,8 +70,7 @@ class _PhoneShellState extends ConsumerState<PhoneShell>
   Widget build(BuildContext context) {
     ref.listen(shellControllerProvider.select((s) => s.openAppId),
         (_, next) => _syncApp(next));
-    ref.listen(shellControllerProvider.select((s) => s.isLocked),
-        (_, next) => _syncLock(next));
+    final isLocked = ref.watch(shellControllerProvider.select((s) => s.isLocked));
 
     return Scaffold(
       backgroundColor: AppColors.osBackground,
@@ -93,7 +78,7 @@ class _PhoneShellState extends ConsumerState<PhoneShell>
         children: [
           const Positioned.fill(child: HomeScreen()),
           if (_currentApp != null) _buildAppLayer(_currentApp!),
-          _buildLockLayer(),
+          _buildLockLayer(isLocked),
           Positioned(
             top: 0,
             left: 0,
@@ -130,25 +115,25 @@ class _PhoneShellState extends ConsumerState<PhoneShell>
     );
   }
 
-  Widget _buildLockLayer() {
+  Widget _buildLockLayer(bool isLocked) {
     return Positioned.fill(
-      child: AnimatedBuilder(
-        animation: _lockController,
-        builder: (context, child) {
-          final v = _lockController.value;
-          if (v == 0) return const SizedBox.shrink();
-          return IgnorePointer(
-            ignoring: v < 0.05,
-            child: Opacity(
-              opacity: v,
-              child: FractionalTranslation(
-                translation: Offset(0, -(1 - v)),
-                child: child,
-              ),
-            ),
-          );
-        },
-        child: const LockScreen(),
+      child: IgnorePointer(
+        ignoring: !isLocked,
+        child: AnimatedSwitcher(
+          duration: AppMotion.medium,
+          switchInCurve: Curves.easeOutCubic,
+          switchOutCurve: Curves.easeInCubic,
+          transitionBuilder: (child, animation) => SlideTransition(
+            position: Tween<Offset>(
+              begin: const Offset(0, -1),
+              end: Offset.zero,
+            ).animate(animation),
+            child: FadeTransition(opacity: animation, child: child),
+          ),
+          child: isLocked
+              ? const LockScreen(key: ValueKey('lock'))
+              : const SizedBox.shrink(key: ValueKey('unlocked')),
+        ),
       ),
     );
   }

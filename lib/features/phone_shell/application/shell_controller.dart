@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/audio/audio_service.dart';
 import '../domain/os_notification.dart';
 import '../domain/phone_app.dart';
 
@@ -50,10 +51,14 @@ class ShellController extends Notifier<ShellState> {
   void lock() => state = state.copyWith(isLocked: true, openAppId: null);
 
   void openApp(String id, {Alignment origin = Alignment.center}) {
+    AudioService.instance.play(Sfx.appOpen);
     state = state.copyWith(openAppId: id, launchOrigin: origin);
   }
 
-  void closeApp() => state = state.copyWith(openAppId: null);
+  void closeApp() {
+    AudioService.instance.play(Sfx.appClose);
+    state = state.copyWith(openAppId: null);
+  }
 
   void pushNotification(OsNotification notification) {
     state = state.copyWith(banners: [...state.banners, notification]);

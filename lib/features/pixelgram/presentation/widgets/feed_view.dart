@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 
+import '../../../../core/audio/audio_service.dart';
 import '../../../../core/haptics/haptics.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
+import '../../../../core/widgets/asset_photo.dart';
 import '../../data/ambient_content.dart';
 import '../../domain/pixelgram_models.dart';
 import 'pixel_avatar.dart';
@@ -19,6 +21,7 @@ class _FeedViewState extends State<FeedView> {
 
   void _toggleLike(FeedPost post) {
     Haptics.light();
+    AudioService.instance.play(Sfx.like);
     setState(() {
       post.liked = !post.liked;
       post.likes += post.liked ? 1 : -1;
@@ -96,12 +99,11 @@ class _PostCard extends StatelessWidget {
       ),
     );
     if (post.imageAsset == null) return gradient;
-    return Image.asset(
+    return resilientAsset(
       post.imageAsset!,
-      fit: BoxFit.cover,
       width: double.infinity,
       cacheWidth: 1080,
-      errorBuilder: (_, __, ___) => gradient,
+      fallback: gradient,
     );
   }
 
