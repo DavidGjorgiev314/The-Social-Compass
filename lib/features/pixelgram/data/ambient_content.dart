@@ -9,49 +9,84 @@ class Accounts {
   static const maya = SocialAccount(
     handle: 'maya.chen',
     name: 'Maya Chen',
-    avatar: Avatar(color: Color(0xFFFF6FA5), initial: 'M'),
+    avatar: Avatar(
+        color: Color(0xFFFF6FA5),
+        initial: 'M',
+        asset: 'assets/images/avatars/maya.jpg'),
   );
   static const devon = SocialAccount(
     handle: 'devonbrooks',
     name: 'Devon Brooks',
-    avatar: Avatar(color: Color(0xFF4C8DFF), initial: 'D'),
+    avatar: Avatar(
+        color: Color(0xFF4C8DFF),
+        initial: 'D',
+        asset: 'assets/images/avatars/devon.jpg'),
     verified: true,
   );
   static const nadia = SocialAccount(
     handle: 'nadia.draws',
     name: 'Nadia Rahman',
-    avatar: Avatar(color: Color(0xFF43E0B8), initial: 'N'),
+    avatar: Avatar(
+        color: Color(0xFF43E0B8),
+        initial: 'N',
+        asset: 'assets/images/avatars/nadia.jpg'),
   );
   static const tyler = SocialAccount(
     handle: 'tyler.vance',
     name: 'Tyler Vance',
-    avatar: Avatar(color: Color(0xFFFFC15E), initial: 'T'),
+    avatar: Avatar(
+        color: Color(0xFFFFC15E),
+        initial: 'T',
+        asset: 'assets/images/avatars/tyler.jpg'),
+  );
+  static const jordan = SocialAccount(
+    handle: 'jordan.reyes',
+    name: 'Jordan Reyes',
+    avatar: Avatar(
+        color: Color(0xFFB06CFF),
+        initial: 'J',
+        asset: 'assets/images/avatars/jordan.jpg'),
   );
   static const kai = SocialAccount(
     handle: 'kai_from_home',
     name: 'Kai',
-    avatar: Avatar(color: Color(0xFF9B8CFF), initial: 'K'),
+    avatar: Avatar(
+        color: Color(0xFF9B8CFF),
+        initial: 'K',
+        asset: 'assets/images/avatars/kai.jpg'),
   );
   static const mom = SocialAccount(
     handle: 'mom',
     name: 'Mom',
-    avatar: Avatar(color: Color(0xFFFF8A5B), initial: 'M'),
+    avatar: Avatar(
+        color: Color(0xFFFF8A5B),
+        initial: 'M',
+        asset: 'assets/images/avatars/mom.jpg'),
   );
   static const campus = SocialAccount(
     handle: 'northgate.campus',
     name: 'Northgate Campus',
-    avatar: Avatar(color: Color(0xFF2C9C8A), initial: 'N'),
+    avatar: Avatar(
+        color: Color(0xFF2C9C8A),
+        initial: 'N',
+        asset: 'assets/images/avatars/campus.jpg'),
     verified: true,
   );
   static const ava = SocialAccount(
     handle: 'ava.rivers',
     name: 'Ava Rivers',
-    avatar: Avatar(color: Color(0xFFE0972C), initial: 'A'),
+    avatar: Avatar(
+        color: Color(0xFFE0972C),
+        initial: 'A',
+        asset: 'assets/images/avatars/ava.jpg'),
   );
   static const leo = SocialAccount(
     handle: 'leo.dfw',
     name: 'Leo Diaz',
-    avatar: Avatar(color: Color(0xFF5AC8FA), initial: 'L'),
+    avatar: Avatar(
+        color: Color(0xFF5AC8FA),
+        initial: 'L',
+        asset: 'assets/images/avatars/leo.jpg'),
   );
 }
 
@@ -61,6 +96,7 @@ List<FeedPost> buildAmbientFeed() => [
         author: Accounts.devon,
         caption: 'season opener saturday. we are NOT losing this one 🏀🔥',
         imageGradient: const [Color(0xFF4C8DFF), Color(0xFF2C5AB0)],
+        imageAsset: 'assets/images/feed/feed_devon.jpg',
         likes: 342,
         comments: 57,
         timeAgo: '25m',
@@ -70,6 +106,7 @@ List<FeedPost> buildAmbientFeed() => [
         author: Accounts.nadia,
         caption: 'stayed up way too late finishing this one 🎨 be nice lol',
         imageGradient: const [Color(0xFF43E0B8), Color(0xFF8E7BFF)],
+        imageAsset: 'assets/images/feed/feed_nadia.jpg',
         likes: 96,
         comments: 12,
         timeAgo: '1h',
@@ -79,6 +116,7 @@ List<FeedPost> buildAmbientFeed() => [
         author: Accounts.campus,
         caption: 'Club Fair is this Friday in the Main Hall, 11am–3pm. Come find your people!',
         imageGradient: const [Color(0xFF2C9C8A), Color(0xFF1F6E8C)],
+        imageAsset: 'assets/images/feed/feed_campus.jpg',
         likes: 210,
         comments: 8,
         timeAgo: '2h',
@@ -88,6 +126,7 @@ List<FeedPost> buildAmbientFeed() => [
         author: Accounts.ava,
         caption: 'campus coffee > everything. this is not up for debate ☕',
         imageGradient: const [Color(0xFFFFD36E), Color(0xFFFF9F45)],
+        imageAsset: 'assets/images/feed/feed_ava.jpg',
         likes: 128,
         comments: 19,
         timeAgo: '3h',
@@ -97,6 +136,7 @@ List<FeedPost> buildAmbientFeed() => [
         author: Accounts.maya,
         caption: 'first week down 😮‍💨 met some cool new people already',
         imageGradient: const [Color(0xFFFF9A8B), Color(0xFFFF6B9A)],
+        imageAsset: 'assets/images/feed/feed_maya.jpg',
         likes: 154,
         comments: 23,
         timeAgo: '5h',
@@ -106,6 +146,7 @@ List<FeedPost> buildAmbientFeed() => [
         author: Accounts.leo,
         caption: 'skate spot behind the library is unreal at sunset 🛹',
         imageGradient: const [Color(0xFF5AC8FA), Color(0xFF3E7BFA)],
+        imageAsset: 'assets/images/feed/feed_leo.jpg',
         likes: 88,
         comments: 6,
         timeAgo: '7h',

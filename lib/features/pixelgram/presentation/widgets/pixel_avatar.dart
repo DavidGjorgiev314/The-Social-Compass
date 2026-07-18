@@ -11,21 +11,21 @@ class PixelAvatar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final inner = CircleAvatar(
-      radius: radius,
-      backgroundColor: avatar.color,
-      backgroundImage: avatar.asset != null ? AssetImage(avatar.asset!) : null,
-      child: avatar.asset == null
-          ? Text(
-              avatar.initial,
-              style: TextStyle(
-                color: Colors.white,
-                fontWeight: FontWeight.w700,
-                fontSize: radius * 0.8,
-              ),
-            )
-          : null,
-    );
+    final diameter = radius * 2;
+
+    Widget inner = _initial(diameter);
+    if (avatar.asset != null) {
+      inner = ClipOval(
+        child: Image.asset(
+          avatar.asset!,
+          width: diameter,
+          height: diameter,
+          fit: BoxFit.cover,
+          cacheWidth: 256,
+          errorBuilder: (_, __, ___) => _initial(diameter),
+        ),
+      );
+    }
 
     if (!ring) return inner;
 
@@ -44,6 +44,23 @@ class PixelAvatar extends StatelessWidget {
           color: Color(0xFF05070C),
         ),
         child: inner,
+      ),
+    );
+  }
+
+  Widget _initial(double diameter) {
+    return Container(
+      width: diameter,
+      height: diameter,
+      alignment: Alignment.center,
+      decoration: BoxDecoration(color: avatar.color, shape: BoxShape.circle),
+      child: Text(
+        avatar.initial,
+        style: TextStyle(
+          color: Colors.white,
+          fontWeight: FontWeight.w700,
+          fontSize: radius * 0.8,
+        ),
       ),
     );
   }

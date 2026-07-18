@@ -85,6 +85,26 @@ class _PostCard extends StatelessWidget {
   final FeedPost post;
   final VoidCallback onLike;
 
+  Widget _image(FeedPost post) {
+    final gradient = DecoratedBox(
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: post.imageGradient,
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+      ),
+    );
+    if (post.imageAsset == null) return gradient;
+    return Image.asset(
+      post.imageAsset!,
+      fit: BoxFit.cover,
+      width: double.infinity,
+      cacheWidth: 1080,
+      errorBuilder: (_, __, ___) => gradient,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -116,26 +136,7 @@ class _PostCard extends StatelessWidget {
             ],
           ),
         ),
-        AspectRatio(
-          aspectRatio: 1,
-          child: DecoratedBox(
-            decoration: BoxDecoration(
-              image: post.imageAsset != null
-                  ? DecorationImage(
-                      image: AssetImage(post.imageAsset!),
-                      fit: BoxFit.cover,
-                    )
-                  : null,
-              gradient: post.imageAsset == null
-                  ? LinearGradient(
-                      colors: post.imageGradient,
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                    )
-                  : null,
-            ),
-          ),
-        ),
+        AspectRatio(aspectRatio: 1, child: _image(post)),
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm, vertical: 4),
           child: Row(

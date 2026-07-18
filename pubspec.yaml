@@ -28,6 +28,7 @@ flutter:
   uses-material-design: true
   assets:
     - assets/images/avatars/
+    - assets/images/feed/
     - assets/images/app_icons/
     - assets/images/ui/
     - assets/images/backgrounds/
