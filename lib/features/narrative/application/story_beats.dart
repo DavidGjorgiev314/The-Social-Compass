@@ -4,12 +4,18 @@ import '../../chat/domain/chat_models.dart';
 import '../domain/story_models.dart';
 
 const Map<String, String> kChannelNames = {
-  'maya': 'Maya',
+  'maya': 'Maya Chen',
   'econ_group': 'Econ 101 · Group Chat',
   'campus_rewards': 'Campus Rewards',
   'devon': 'Devon Brooks',
   'nadia': 'Nadia Rahman',
-  'jordan': 'Jordan Reyes',
+  'jordan': 'Jordan',
+  'tyler': 'Tyler Vance',
+  'ava': 'Ava Rivers',
+  'leo': 'Leo Diaz',
+  'kai': 'Kai',
+  'mom': 'Mom',
+  'riley': 'Riley',
   'security': 'Pixelgram Security',
   'impostor': 'Mayaa',
   'burnbook': '🔥 side chat',
@@ -28,6 +34,18 @@ String channelName(String? conversationId) =>
       return (asset: 'assets/images/avatars/nadia.jpg', color: const Color(0xFF43E0B8), initial: 'N');
     case 'jordan':
       return (asset: 'assets/images/avatars/jordan.jpg', color: const Color(0xFFB06CFF), initial: 'J');
+    case 'tyler':
+      return (asset: 'assets/images/avatars/tyler.jpg', color: const Color(0xFFFFC15E), initial: 'T');
+    case 'ava':
+      return (asset: 'assets/images/avatars/ava.jpg', color: const Color(0xFFE0972C), initial: 'A');
+    case 'leo':
+      return (asset: 'assets/images/avatars/leo.jpg', color: const Color(0xFF5AC8FA), initial: 'L');
+    case 'kai':
+      return (asset: 'assets/images/avatars/kai.jpg', color: const Color(0xFF9B8CFF), initial: 'K');
+    case 'mom':
+      return (asset: 'assets/images/avatars/mom.jpg', color: const Color(0xFFFF8A5B), initial: 'M');
+    case 'riley':
+      return (asset: 'assets/images/avatars/riley.jpg', color: const Color(0xFFEC5D8C), initial: 'R');
     case 'econ_group':
       return (asset: null, color: const Color(0xFF6B7385), initial: '#');
     case 'campus_rewards':

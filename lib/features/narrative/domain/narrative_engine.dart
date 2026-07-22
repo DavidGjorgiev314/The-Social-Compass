@@ -13,12 +13,28 @@ class NarrativeEngine {
   GameState applyChoice(GameState state, StoryChoice choice) {
     final newStats = choice.delta.applyTo(state.stats);
     final newFlags = {...state.flags, ...choice.setFlags};
+    final newRel = _applyRel(state.relationships, choice.rel);
+    final newMemories = choice.memory == null
+        ? state.memories
+        : [...state.memories, choice.memory!];
     return state.copyWith(
       stats: newStats,
       flags: newFlags,
+      relationships: newRel,
+      memories: newMemories,
       currentNodeId: choice.nextNodeId,
       updatedAt: DateTime.now(),
     );
+  }
+
+  Map<String, int> _applyRel(Map<String, int> current, Map<String, int> deltas) {
+    if (deltas.isEmpty) return current;
+    final next = {...current};
+    deltas.forEach((id, delta) {
+      final base = next[id] ?? GameState.neutralRelationship;
+      next[id] = (base + delta).clamp(0, 100);
+    });
+    return next;
   }
 
   GameState advanceTo(GameState state, String nodeId) {

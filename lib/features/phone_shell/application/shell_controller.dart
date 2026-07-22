@@ -100,7 +100,7 @@ class ShellController extends Notifier<ShellState> {
     ),
     PhoneApp(
       id: PhoneApps.photos,
-      label: 'Photos',
+      label: 'Gallery',
       icon: Icons.collections_rounded,
       gradient: [Color(0xFF43E0B8), Color(0xFF2C9C8A)],
     ),

@@ -18,6 +18,8 @@ class ChatMessage {
     required this.senderName,
     required this.fromPlayer,
     this.system = false,
+    this.memory = false,
+    this.imageAsset,
   });
 
   final String id;
@@ -26,6 +28,12 @@ class ChatMessage {
   final String senderName;
   final bool fromPlayer;
   final bool system;
+
+  /// A "will remember that" beat.
+  final bool memory;
+
+  /// When set the bubble renders an image (photo) instead of text.
+  final String? imageAsset;
 }
 
 class ReplyOption {
@@ -60,6 +68,13 @@ class PlayerChoice extends ChatBeat {
 
 class SystemLine extends ChatBeat {
   const SystemLine({required this.text});
+
+  final String text;
+}
+
+/// A "will remember that" beat, styled distinctly from system lines.
+class MemoryLine extends ChatBeat {
+  const MemoryLine({required this.text});
 
   final String text;
 }

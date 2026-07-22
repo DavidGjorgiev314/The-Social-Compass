@@ -1,4 +1,5 @@
 import 'game_stats.dart';
+import 'photo_request.dart';
 import 'profile_choices.dart';
 import 'stored_message.dart';
 
@@ -15,10 +16,16 @@ class GameState {
     required this.updatedAt,
     this.threads = const {},
     this.unread = const {},
+    this.relationships = const {},
+    this.memories = const [],
+    this.pendingPhoto,
     this.schemaVersion = currentSchemaVersion,
   });
 
-  static const int currentSchemaVersion = 1;
+  static const int currentSchemaVersion = 2;
+
+  /// Neutral starting point for a relationship the story hasn't touched yet.
+  static const int neutralRelationship = 50;
 
   final ProfileChoices profile;
   final int day;
@@ -31,6 +38,17 @@ class GameState {
   final DateTime updatedAt;
   final Map<String, List<StoredMessage>> threads;
   final Map<String, bool> unread;
+
+  /// Per-character relationship score (0..100). Drives the branching so a
+  /// choice with one person ripples out into how everyone else treats you.
+  final Map<String, int> relationships;
+
+  /// Ordered log of the "will remember that" beats the player has triggered.
+  final List<String> memories;
+
+  /// A photo an NPC is currently waiting on, if any.
+  final PhotoRequest? pendingPhoto;
+
   final int schemaVersion;
 
   bool flag(String key) => flags[key] ?? false;
@@ -39,6 +57,9 @@ class GameState {
       threads[conversationId] ?? const [];
 
   bool isUnread(String conversationId) => unread[conversationId] ?? false;
+
+  int relationship(String characterId) =>
+      relationships[characterId] ?? neutralRelationship;
 
   factory GameState.initial({DateTime? now}) {
     final timestamp = now ?? DateTime.now();
@@ -67,6 +88,9 @@ class GameState {
     DateTime? updatedAt,
     Map<String, List<StoredMessage>>? threads,
     Map<String, bool>? unread,
+    Map<String, int>? relationships,
+    List<String>? memories,
+    Object? pendingPhoto = _sentinel,
     int? schemaVersion,
   }) {
     return GameState(
@@ -83,6 +107,11 @@ class GameState {
       updatedAt: updatedAt ?? this.updatedAt,
       threads: threads ?? this.threads,
       unread: unread ?? this.unread,
+      relationships: relationships ?? this.relationships,
+      memories: memories ?? this.memories,
+      pendingPhoto: pendingPhoto == _sentinel
+          ? this.pendingPhoto
+          : pendingPhoto as PhotoRequest?,
       schemaVersion: schemaVersion ?? this.schemaVersion,
     );
   }
@@ -107,6 +136,9 @@ class GameState {
             entry.key: [for (final m in entry.value) m.toMap()],
         },
         'unread': unread,
+        'relationships': relationships,
+        'memories': memories,
+        if (pendingPhoto != null) 'pendingPhoto': pendingPhoto!.toMap(),
         'meta': {
           'createdAt': createdAt.toIso8601String(),
           'updatedAt': updatedAt.toIso8601String(),
@@ -121,6 +153,8 @@ class GameState {
     final rawFlags = (map['flags'] as Map?)?.cast<String, dynamic>() ?? {};
     final rawThreads = (map['threads'] as Map?)?.cast<String, dynamic>() ?? {};
     final rawUnread = (map['unread'] as Map?)?.cast<String, dynamic>() ?? {};
+    final rawRel = (map['relationships'] as Map?)?.cast<String, dynamic>() ?? {};
+    final rawPhoto = (map['pendingPhoto'] as Map?)?.cast<String, dynamic>();
 
     return GameState(
       profile: ProfileChoices.fromMap(
@@ -141,6 +175,10 @@ class GameState {
           ],
       },
       unread: rawUnread.map((k, v) => MapEntry(k, v as bool? ?? false)),
+      relationships:
+          rawRel.map((k, v) => MapEntry(k, (v as num?)?.toInt() ?? 50)),
+      memories: (map['memories'] as List?)?.cast<String>() ?? const [],
+      pendingPhoto: rawPhoto == null ? null : PhotoRequest.fromMap(rawPhoto),
       createdAt:
           DateTime.tryParse(meta['createdAt'] as String? ?? '') ??
               DateTime.now(),

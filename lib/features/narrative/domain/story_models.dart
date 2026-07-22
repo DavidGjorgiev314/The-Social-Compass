@@ -24,6 +24,8 @@ class StoryCondition {
     this.maxFriendship,
     this.maxTrust,
     this.maxAwareness,
+    this.minRel = const {},
+    this.maxRel = const {},
   });
 
   final Map<String, bool> flags;
@@ -33,6 +35,10 @@ class StoryCondition {
   final int? maxFriendship;
   final int? maxTrust;
   final int? maxAwareness;
+
+  /// Per-character relationship gates (characterId -> threshold).
+  final Map<String, int> minRel;
+  final Map<String, int> maxRel;
 
   bool matches(GameState state) {
     for (final entry in flags.entries) {
@@ -45,6 +51,12 @@ class StoryCondition {
     if (maxFriendship != null && s.friendship > maxFriendship!) return false;
     if (maxTrust != null && s.trust > maxTrust!) return false;
     if (maxAwareness != null && s.awareness > maxAwareness!) return false;
+    for (final entry in minRel.entries) {
+      if (state.relationship(entry.key) < entry.value) return false;
+    }
+    for (final entry in maxRel.entries) {
+      if (state.relationship(entry.key) > entry.value) return false;
+    }
     return true;
   }
 }
@@ -55,18 +67,34 @@ class StoryChoice {
     required this.text,
     required this.nextNodeId,
     this.delta = const StatDelta(),
+    this.rel = const {},
     this.setFlags = const {},
     this.visibleIf,
     this.isAction = false,
+    this.memory,
+    this.opensGallery = false,
   });
 
   final String id;
   final String text;
   final String nextNodeId;
   final StatDelta delta;
+
+  /// Per-character relationship changes (characterId -> delta). This is what
+  /// makes a single reply ripple across every storyline.
+  final Map<String, int> rel;
+
   final Map<String, bool> setFlags;
   final StoryCondition? visibleIf;
   final bool isAction;
+
+  /// When set, choosing this drops a memory beat into the chat (e.g.
+  /// "Nadia will remember that.") and logs it to the save.
+  final String? memory;
+
+  /// When true, choosing this defers the story: it opens the Gallery so the
+  /// player can pick a photo to send. Resolves to [nextNodeId] once sent.
+  final bool opensGallery;
 }
 
 class StoryLine {
@@ -81,7 +109,7 @@ class StoryLine {
   final String text;
 }
 
-enum NodeKind { chat, phishing, event, dayBreak, ending, router }
+enum NodeKind { chat, phishing, photoRequest, event, dayBreak, ending, router }
 
 class NodeRoute {
   const NodeRoute({required this.when, required this.nodeId});

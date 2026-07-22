@@ -44,29 +44,29 @@ void main() {
     expect(ending!.kind, NodeKind.ending);
   });
 
-  test('the "defend then report" path builds trust and awareness', () {
+  test('defending Nadia sets the flag and builds trust', () {
     var state = GameState.initial().copyWith(currentNodeId: 'D1_START', day: 1);
 
     state = engine.applyChoice(state, choiceById('D1_START', 'warm'));
-    expect(state.currentNodeId, 'D1_BULLY_1');
+    expect(state.currentNodeId, 'D1_MAYA_2');
 
-    state = engine.applyChoice(state, choiceById('D1_BULLY_1', 'defend'));
+    state = engine.applyChoice(state, choiceById('D1_MAYA_2', 'ask'));
+    expect(state.currentNodeId, 'D1_GROUP_1');
+
+    state = engine.applyChoice(state, choiceById('D1_GROUP_1', 'defend'));
     expect(state.flag(StoryFlags.defendedNadia), true);
-    expect(state.currentNodeId, 'D1_PHISH_1');
-
-    state = engine.applyChoice(state, choiceById('D1_PHISH_1', 'report'));
-    expect(state.currentNodeId, 'D1_END');
-
+    expect(state.currentNodeId, 'D1_KAI');
     expect(state.stats.trust, greaterThan(50));
-    expect(state.stats.awareness, greaterThan(35));
-    expect(state.flag(StoryFlags.joinedClique), false);
+    expect(state.relationship('nadia'), greaterThan(GameState.neutralRelationship));
   });
 
+  // Deterministic walker. Picks are keyed by node id -> choice id. Gallery
+  // (opensGallery) choices are treated as plain advances here.
   GameState walk(Map<String, String> picks) {
     var state = GameState.initial().copyWith(currentNodeId: 'D1_START', day: 1);
     var id = 'D1_START';
     var guard = 0;
-    while (guard++ < 200) {
+    while (guard++ < 300) {
       final node = storyNode(id)!;
       switch (node.kind) {
         case NodeKind.ending:
@@ -78,8 +78,11 @@ void main() {
           id = node.autoNextNodeId!;
         case NodeKind.chat:
         case NodeKind.phishing:
-          final choice =
-              node.choices.firstWhere((c) => c.id == picks[node.id]);
+        case NodeKind.photoRequest:
+          final choice = node.choices.firstWhere(
+            (c) => c.id == picks[node.id],
+            orElse: () => throw StateError('no pick for ${node.id}'),
+          );
           state = engine.applyChoice(state, choice);
           id = state.currentNodeId;
       }
@@ -87,55 +90,85 @@ void main() {
     throw StateError('walk did not terminate (loop in graph?)');
   }
 
-  test('a defend-and-report private-profile run reaches the best ending', () {
+  test('a defend-report-support run reaches the best ending', () {
     final state = walk({
       'D1_START': 'warm',
-      'D1_BULLY_1': 'defend',
+      'D1_MAYA_2': 'ask',
+      'D1_GROUP_1': 'defend',
+      'D1_KAI': 'warm',
       'D1_PHISH_1': 'report',
-      'D2_ALLY': 'befriend',
-      'D3_BULLY_2': 'defend',
-      'D3_PHISH_3': 'report',
+      'D2_NADIA_THANKS': 'befriend',
+      'D2_AVA': 'accept',
+      'D2_LEO': 'friendly',
+      'D2_PHISH_2': 'report',
+      'D3_GROUP_2': 'defend',
+      'D3_TYLER': 'turn',
+      'D3_MAYA_SECRET': 'advise',
+      'D3_IMPOSTOR': 'report',
       'D4_NADIA_SCARED': 'help',
-      'D4_PHISH_4': 'report',
-      'D5_TURN': 'support',
+      'D4_AVA_PHOTO': 'shy',
+      'D4_SECURITY': 'report',
+      'D5_KAI': 'reconnect',
+      'D5_NADIA_WARM': 'support',
       'D5_PHISH_5': 'report',
-      'D6_START': 'reflect',
+      'D6_STAND': 'proud',
+      'D6_TYLER_OUT': 'welcome',
+      'D6_FINAL_MAYA': 'reflect',
     });
 
     expect(state.flag(StoryFlags.defendedNadia), true);
     expect(state.flag(StoryFlags.phishedBadly), false);
+    expect(state.stats.trust, greaterThanOrEqualTo(70));
+    expect(state.stats.awareness, greaterThanOrEqualTo(70));
     expect(resolveEnding(state).id, 'the_digital_compass');
   });
 
   test('a join-the-clique run reaches the popular-but-hollow ending', () {
     final state = walk({
       'D1_START': 'warm',
-      'D1_BULLY_1': 'join',
+      'D1_MAYA_2': 'ok',
+      'D1_GROUP_1': 'join',
+      'D1_KAI': 'brag',
       'D1_PHISH_1': 'delete',
       'D2_CLIQUE': 'lean_in',
-      'D3_BULLY_2': 'join',
-      'D3_PHISH_3': 'delete',
+      'D2_AVA': 'decline',
+      'D2_LEO': 'rude',
+      'D2_PHISH_2': 'delete',
+      'D3_GROUP_2': 'join',
+      'D3_TYLER': 'egg',
+      'D3_MAYA_SECRET': 'dismiss',
+      'D3_IMPOSTOR': 'delete',
       'D4_BURNBOOK': 'feed',
-      'D4_PHISH_4': 'delete',
-      'D5_TURN': 'later',
+      'D4_SECURITY': 'ignore',
+      'D5_KAI': 'deflect',
+      'D5_NADIA_COLD': 'defensive',
       'D5_PHISH_5': 'delete',
-      'D6_START': 'reflect',
+      'D6_CLIQUE_FALLOUT': 'cover',
+      'D6_FINAL_MAYA': 'reflect',
     });
 
     expect(state.flag(StoryFlags.joinedClique), true);
+    expect(state.stats.friendship, greaterThanOrEqualTo(70));
     expect(resolveEnding(state).id, 'popular_but_hollow');
   });
 
   test('clicking the account-recovery scam forces the compromised ending', () {
     final state = walk({
       'D1_START': 'warm',
-      'D1_BULLY_1': 'defend',
+      'D1_MAYA_2': 'ok',
+      'D1_GROUP_1': 'defend',
+      'D1_KAI': 'warm',
       'D1_PHISH_1': 'report',
-      'D2_ALLY': 'befriend',
-      'D3_BULLY_2': 'defend',
-      'D3_PHISH_3': 'report',
+      'D2_NADIA_THANKS': 'befriend',
+      'D2_AVA': 'maybe',
+      'D2_LEO': 'polite',
+      'D2_PHISH_2': 'report',
+      'D3_GROUP_2': 'defend',
+      'D3_TYLER': 'neutral',
+      'D3_MAYA_SECRET': 'advise',
+      'D3_IMPOSTOR': 'report',
       'D4_NADIA_SCARED': 'help',
-      'D4_PHISH_4': 'click',
+      'D4_SECURITY': 'click',
     });
 
     expect(state.flag(StoryFlags.accountCompromised), true);

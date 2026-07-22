@@ -30,6 +30,19 @@ class StoryFlags {
   static const ignoredAll = 'ignored_all';
   static const joinedClique = 'joined_clique';
   static const reportedDevon = 'reported_devon';
+
+  // Expanded storylines
+  static const helpedNadia = 'helped_nadia';
+  static const befriendedAva = 'befriended_ava';
+  static const befriendedLeo = 'befriended_leo';
+  static const turnedTyler = 'turned_tyler';
+  static const neglectedKai = 'neglected_kai';
+  static const toldAdult = 'told_adult';
+  static const sharedPrivateWithStranger = 'shared_private_with_stranger';
+  static const handledSextortion = 'handled_sextortion';
+  static const blockedStranger = 'blocked_stranger';
+  static const caughtImpostor = 'caught_impostor';
+  static const clubFeature = 'club_feature';
 }
 
 const List<Ending> kEndings = [
@@ -45,6 +58,23 @@ const List<Ending> kEndings = [
     condition: StoryCondition(flags: {StoryFlags.accountCompromised: true}),
   ),
   Ending(
+    id: 'exploited',
+    title: 'It Got Out',
+    description:
+        'A photo you sent to someone you barely knew became a leash. The '
+        'threats, the silence, the dread of who\'d seen it — none of it was '
+        'your fault, but you carried it alone when you didn\'t have to. The '
+        'moment you tell a trusted adult is the moment it starts to end.',
+    isOverride: true,
+    priority: 95,
+    condition: StoryCondition(
+      flags: {
+        StoryFlags.sharedPrivateWithStranger: true,
+        StoryFlags.handledSextortion: false,
+      },
+    ),
+  ),
+  Ending(
     id: 'in_too_deep',
     title: 'In Too Deep',
     description:
@@ -54,7 +84,7 @@ const List<Ending> kEndings = [
     priority: 90,
     condition: StoryCondition(
       flags: {StoryFlags.creeperEscalated: true},
-      maxAwareness: 40,
+      maxAwareness: 45,
     ),
   ),
   Ending(
@@ -69,6 +99,19 @@ const List<Ending> kEndings = [
       flags: {StoryFlags.defendedNadia: true, StoryFlags.phishedBadly: false},
       minTrust: 70,
       minAwareness: 70,
+    ),
+  ),
+  Ending(
+    id: 'found_your_people',
+    title: 'Found Your People',
+    description:
+        'You didn\'t chase the loudest crowd. You showed up for Nadia, backed '
+        'Ava\'s club, kept Kai close, and pulled Tyler out of Devon\'s orbit. '
+        'A week in and you already know exactly who\'s worth your time.',
+    priority: 76,
+    condition: StoryCondition(
+      flags: {StoryFlags.befriendedAva: true, StoryFlags.helpedNadia: true},
+      minTrust: 55,
     ),
   ),
   Ending(

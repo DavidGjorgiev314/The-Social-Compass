@@ -15,6 +15,10 @@ import '../../chat/presentation/widgets/reply_options.dart';
 import '../../chat/presentation/widgets/typing_indicator.dart';
 import '../../game/application/game_controller.dart';
 import '../../phishing/presentation/lockout_screen.dart';
+import '../../phone_shell/application/shell_controller.dart';
+import '../../phone_shell/domain/os_notification.dart';
+import '../../phone_shell/domain/phone_app.dart';
+import '../../phone_shell/presentation/widgets/route_notification_banner.dart';
 import '../../phone_shell/presentation/widgets/status_bar.dart';
 import '../application/story_beats.dart';
 import '../data/story_graph.dart';
@@ -53,7 +57,9 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
     final node = state != null ? storyNode(state.currentNodeId) : null;
     final pendingHere = node != null &&
         node.conversationId == conv &&
-        (node.kind == NodeKind.chat || node.kind == NodeKind.phishing);
+        (node.kind == NodeKind.chat ||
+            node.kind == NodeKind.phishing ||
+            node.kind == NodeKind.photoRequest);
 
     final seed = <ChatMessage>[];
     final script = <ChatBeat>[];
@@ -101,12 +107,14 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
   }
 
   ChatMessage _toChatMessage(StoredMessage m) => ChatMessage(
-        id: 'seed_${m.nodeId}_${m.text.hashCode}',
+        id: 'seed_${m.nodeId}_${m.text.hashCode}_${m.imageAsset ?? ''}',
         text: m.text,
         senderId: m.senderId,
         senderName: m.senderName,
         fromPlayer: m.fromPlayer,
         system: m.system,
+        memory: m.memory,
+        imageAsset: m.imageAsset,
       );
 
   List<ChatBeat> _choiceBeats(StoryNode node, GameState state) {
@@ -120,6 +128,7 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
               id: c.id,
               text: c.text,
               isAction: c.isAction ||
+                  c.opensGallery ||
                   node.kind == NodeKind.phishing ||
                   c.text.trim().startsWith('('),
             ),
@@ -137,6 +146,9 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
     final step = await ref
         .read(gameControllerProvider.notifier)
         .applyStoryChoice(choice, widget.conversationId);
+    if (choice.memory != null) {
+      _controller.enqueue([MemoryLine(text: choice.memory!)]);
+    }
     await _handleStep(step);
   }
 
@@ -176,6 +188,11 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
         Navigator.of(context).pushReplacement(
           MaterialPageRoute(builder: (_) => EndingScreen(ending: ending)),
         );
+      case StoryOpenGallery():
+        // Leave the chat and open the Gallery so the player can pick a photo.
+        if (!mounted) return;
+        Navigator.of(context).maybePop();
+        ref.read(shellControllerProvider.notifier).openApp(PhoneApps.photos);
       case StoryPaused():
         _controller.enqueue(const [
           SystemLine(text: 'To be continued — more of the week is coming soon.'),
@@ -201,7 +218,35 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
 
     return Scaffold(
       backgroundColor: AppColors.osBackground,
-      body: ListenableBuilder(
+      body: Stack(
+        children: [
+          Positioned.fill(child: _buildChat(title, avatar)),
+          Positioned(
+            top: 0,
+            left: 0,
+            right: 0,
+            child: RouteNotificationBanner(onTapBanner: _openFromBanner),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _openFromBanner(OsNotification banner) {
+    final target = banner.route;
+    if (target == null || target == widget.conversationId) return;
+    Navigator.of(context).pushReplacement(
+      MaterialPageRoute(
+        builder: (_) => ConversationScreen(conversationId: target),
+      ),
+    );
+  }
+
+  Widget _buildChat(
+    String title,
+    ({String? asset, Color color, String initial}) avatar,
+  ) {
+    return ListenableBuilder(
         listenable: _controller,
         builder: (context, _) {
           final state = _controller.state;
@@ -256,9 +301,7 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
               const FakeKeyboard(),
             ],
           );
-        },
-      ),
-    );
+        });
   }
 
   Widget _header(

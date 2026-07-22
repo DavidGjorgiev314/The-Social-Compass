@@ -101,16 +101,25 @@ void main() {
     final notifier = container.read(gameControllerProvider.notifier);
     await notifier.completeProfile(const ProfileChoices(displayName: 'Nova'));
 
+    // First reply stays inside Maya's thread (same conversation).
     final warm =
         storyNode('D1_START')!.choices.firstWhere((c) => c.id == 'warm');
-    final step = await notifier.applyStoryChoice(warm, 'maya');
+    var step = await notifier.applyStoryChoice(warm, 'maya');
+    expect(step, isA<StoryArrived>());
+    expect((step as StoryArrived).sameConversation, true);
+    expect(repo.store['u1']!.currentNodeId, 'D1_MAYA_2');
+
+    // Next reply moves the story into the group chat (different conversation).
+    final ok =
+        storyNode('D1_MAYA_2')!.choices.firstWhere((c) => c.id == 'ok');
+    step = await notifier.applyStoryChoice(ok, 'maya');
 
     final s = repo.store['u1']!;
     expect(s.thread('maya').any((m) => m.fromPlayer), true);
-    expect(s.currentNodeId, 'D1_BULLY_1');
+    expect(s.currentNodeId, 'D1_GROUP_1');
     expect(step, isA<StoryArrived>());
     expect((step as StoryArrived).sameConversation, false);
-    // Different conversation: delivered later (on exit), not instantly.
+    // Different conversation: delivered after the delay, not instantly.
     expect(s.thread('econ_group'), isEmpty);
   });
 
@@ -123,8 +132,11 @@ void main() {
     final warm =
         storyNode('D1_START')!.choices.firstWhere((c) => c.id == 'warm');
     await notifier.applyStoryChoice(warm, 'maya');
+    final ok =
+        storyNode('D1_MAYA_2')!.choices.firstWhere((c) => c.id == 'ok');
+    await notifier.applyStoryChoice(ok, 'maya');
 
-    // Simulates the exit delay elapsing.
+    // Simulates the delivery delay elapsing.
     await notifier.deliverPendingConversation('econ_group');
 
     final s = repo.store['u1']!;

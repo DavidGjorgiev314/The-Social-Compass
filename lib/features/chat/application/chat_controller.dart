@@ -121,7 +121,31 @@ class ChatController extends ChangeNotifier {
         _set(_state.copyWith(options: beat.options, awaitingChoice: true));
       case SystemLine():
         _playSystemLine(beat);
+      case MemoryLine():
+        await _playMemoryLine(beat);
     }
+  }
+
+  Future<void> _playMemoryLine(MemoryLine line) async {
+    await Future.delayed(const Duration(milliseconds: 420));
+    if (_disposed) return;
+    AudioService.instance.play(Sfx.notification);
+    _set(_state.copyWith(
+      messages: [
+        ..._state.messages,
+        ChatMessage(
+          id: 'm${_state.messages.length}',
+          text: line.text,
+          senderId: 'memory',
+          senderName: 'memory',
+          fromPlayer: false,
+          memory: true,
+        ),
+      ],
+    ));
+    await Future.delayed(const Duration(milliseconds: 350));
+    if (_disposed) return;
+    _advance();
   }
 
   void _playSystemLine(SystemLine line) {

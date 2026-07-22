@@ -18,6 +18,12 @@ class StoryEnded extends StoryStep {
   const StoryEnded();
 }
 
+/// The player chose to send a photo: leave the chat and open the Gallery.
+class StoryOpenGallery extends StoryStep {
+  const StoryOpenGallery(this.conversationId);
+  final String conversationId;
+}
+
 class StoryPaused extends StoryStep {
   const StoryPaused();
 }

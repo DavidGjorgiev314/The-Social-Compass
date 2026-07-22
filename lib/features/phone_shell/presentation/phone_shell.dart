@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_motion.dart';
+import '../../narrative/presentation/conversation_screen.dart';
 import '../domain/os_notification.dart';
 import '../domain/phone_app.dart';
 import '../application/shell_controller.dart';
@@ -64,6 +65,14 @@ class _PhoneShellState extends ConsumerState<PhoneShell>
     final controller = ref.read(shellControllerProvider.notifier);
     controller.unlock();
     controller.openApp(banner.appId);
+    final route = banner.route;
+    if (route != null && banner.appId == PhoneApps.pixelgram) {
+      Navigator.of(context).push(
+        MaterialPageRoute(
+          builder: (_) => ConversationScreen(conversationId: route),
+        ),
+      );
+    }
   }
 
   @override

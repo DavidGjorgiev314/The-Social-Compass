@@ -6,6 +6,8 @@ class StoredMessage {
     required this.fromPlayer,
     required this.nodeId,
     this.system = false,
+    this.memory = false,
+    this.imageAsset,
   });
 
   final String text;
@@ -15,6 +17,12 @@ class StoredMessage {
   final String nodeId;
   final bool system;
 
+  /// A "will remember that" beat, rendered as a distinct centered pill.
+  final bool memory;
+
+  /// When set the message is an image (photo) rather than plain text.
+  final String? imageAsset;
+
   Map<String, dynamic> toMap() => {
         'text': text,
         'senderId': senderId,
@@ -22,6 +30,8 @@ class StoredMessage {
         'fromPlayer': fromPlayer,
         'nodeId': nodeId,
         'system': system,
+        'memory': memory,
+        if (imageAsset != null) 'imageAsset': imageAsset,
       };
 
   factory StoredMessage.fromMap(Map<String, dynamic> map) {
@@ -32,6 +42,8 @@ class StoredMessage {
       fromPlayer: map['fromPlayer'] as bool? ?? false,
       nodeId: map['nodeId'] as String? ?? '',
       system: map['system'] as bool? ?? false,
+      memory: map['memory'] as bool? ?? false,
+      imageAsset: map['imageAsset'] as String?,
     );
   }
 }
